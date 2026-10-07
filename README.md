@@ -1,16 +1,16 @@
 # C++ Job System
 
-A from-scratch C++ job system for executing CPU-bound tasks across a configurable pool of worker threads.
+A C++ job system that I'm building to learn more about threads and running tasks at the same time.
 
-This project is being built incrementally to explore **multithreading, synchronization, task scheduling, and performance** in modern C++.
+I'm working on this step by step to get more comfortable with **multithreading, synchronization, task scheduling, and C++**.
 
 ## Goals
 
-- Build a reusable thread pool / job system from scratch
-- Learn thread synchronization with the C++ standard library
-- Support safe task submission and worker shutdown
-- Add tests and performance benchmarks
-- Investigate how different worker counts affect throughput
+- Learn how thread pools work
+- Practice using threads and the C++ standard library
+- Make a way to submit tasks to worker threads
+- Add tests and benchmarks as I build more
+- See how changing the number of worker threads affects performance
 
 ## Planned Roadmap
 
@@ -22,7 +22,7 @@ This project is being built incrementally to explore **multithreading, synchroni
 - [ ] Tests
 - [ ] Benchmarks
 - [ ] Task priorities
-- [ ] Work stealing (advanced)
+- [ ] Work stealing (maybe later)
 
 ## Project Structure
 
@@ -37,7 +37,7 @@ benchmarks/   Performance benchmarks
 ## Requirements
 
 - C++23 compiler
-- CMake 4.2+
+- CMake 3.20+
 - Standard C++ library
 
 ## Build
@@ -47,7 +47,7 @@ cmake -S . -B build
 cmake --build build
 ```
 
-The implementation is intentionally being developed step by step rather than starting with a finished thread pool.
+I'm still building this project, so some of the parts above are planned and not finished yet.
 
 ## License
 

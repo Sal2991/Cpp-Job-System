@@ -1,21 +1,36 @@
 # C++ Job System
 
-I'm building a small C++ job system to learn how threads can run tasks at the same time.
+A small C++23 thread-pool/job-system project for learning concurrent task execution with the standard library.
 
-## What works so far
+## Current functionality
 
-- Starts a fixed number of worker threads
-- Adds jobs to a queue that workers share safely
-- Wakes a worker when a new job is submitted
-- Waits for queued jobs to finish when the job system shuts down
-- Includes a small example and a basic test for running multiple jobs
+- Starts a fixed set of worker threads (a requested count of zero is normalized to one)
+- Stores submitted `std::function<void()>` jobs in a shared queue
+- Protects queue access with a mutex and wakes workers with a condition variable
+- Runs jobs outside the queue lock
+- Drains queued work during shutdown and joins worker threads
+- Includes a multi-task example and a basic test that submits ten jobs and waits for completion
 
-## Still to do
+## Build and test
 
-- Decide how exceptions thrown by jobs should be handled
-- Add a way to get return values from jobs
-- Add more tests for shutdown and invalid submissions
-- Benchmark different worker counts
-- Try the project on more than one compiler
+Requirements: CMake 3.20+ and a compiler with C++23 support.
 
-This is still an early version. The queue and worker loop are the first part, not a complete production job system.
+```sh
+cmake -S . -B build
+cmake --build build --config Release
+ctest --test-dir build -C Release --output-on-failure
+```
+
+Run the example:
+
+```sh
+./build/job_system_example
+```
+
+For multi-configuration generators such as Visual Studio, the executable is typically under `build/Release` (or `build/Debug`).
+
+## Limitations and next steps
+
+This is an early learning project, not a production-ready executor. Jobs currently have no return-value API or defined exception-handling policy; an exception escaping a job can terminate the process. The current test is a basic concurrency smoke test, not exhaustive coverage of shutdown races or invalid submissions.
+
+Possible next steps include adding explicit exception handling, stronger tests, and benchmarking worker counts. Bounded retry is not implemented.

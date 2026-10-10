@@ -13,6 +13,6 @@ add_executable(job_system_example examples/basic.cpp)
 target_link_libraries(job_system_example PRIVATE job_system)
 
 enable_testing()
-add_executable(job_system_tests tests/test_placeholder.cpp)
+add_executable(job_system_tests tests/test_job_system.cpp)
 target_link_libraries(job_system_tests PRIVATE job_system)
 add_test(NAME job_system_tests COMMAND job_system_tests)

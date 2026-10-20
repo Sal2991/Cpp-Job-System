@@ -48,6 +48,13 @@ void JobSystem::submit(std::function<void()> job) {
     jobsReady.notify_one();
 }
 
+void JobSystem::waitIdle() {
+    std::unique_lock<std::mutex> lock(jobsMutex);
+    idle.wait(lock, [this] {
+        return jobs.empty() && activeJobs == 0;
+    });
+}
+
 void JobSystem::workerLoop() {
     while (true) {
         std::function<void()> job;
@@ -64,10 +71,19 @@ void JobSystem::workerLoop() {
 
             job = std::move(jobs.front());
             jobs.pop();
+            ++activeJobs;
         }
 
         // Run the job without holding the queue lock.
         job();
+
+        {
+            std::lock_guard<std::mutex> lock(jobsMutex);
+            --activeJobs;
+            if (jobs.empty() && activeJobs == 0) {
+                idle.notify_all();
+            }
+        }
     }
 }
 

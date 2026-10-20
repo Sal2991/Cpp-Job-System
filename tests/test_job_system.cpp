@@ -2,26 +2,37 @@
 
 #include <atomic>
 #include <cassert>
-#include <future>
+#include <functional>
+#include <stdexcept>
 
 int main() {
     job_system::JobSystem jobs(2);
     std::atomic<int> finishedCount{0};
-    std::promise<void> allDone;
-    std::future<void> result = allDone.get_future();
 
     for (int i = 0; i < 10; ++i) {
-        jobs.submit([&finishedCount, &allDone] {
-            int previousCount = finishedCount.fetch_add(1);
-
-            if (previousCount == 9) {
-                allDone.set_value();
-            }
+        jobs.submit([&finishedCount] {
+            finishedCount.fetch_add(1);
         });
     }
 
-    result.wait();
+    jobs.waitIdle();
     assert(finishedCount.load() == 10);
+
+    bool rejectedEmptyJob = false;
+    try {
+        jobs.submit(std::function<void()>{});
+    } catch (const std::invalid_argument&) {
+        rejectedEmptyJob = true;
+    }
+    assert(rejectedEmptyJob);
+
+    // A zero-worker request is normalized to one worker and still completes work.
+    job_system::JobSystem singleWorker(0);
+    singleWorker.submit([&finishedCount] {
+        finishedCount.fetch_add(1);
+    });
+    singleWorker.waitIdle();
+    assert(finishedCount.load() == 11);
 
     return 0;
 }

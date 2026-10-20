@@ -20,6 +20,9 @@ public:
 
     void submit(std::function<void()> job);
 
+    // Block until all jobs submitted so far have completed.
+    void waitIdle();
+
 private:
     void workerLoop();
 
@@ -27,6 +30,8 @@ private:
     std::queue<std::function<void()>> jobs;
     std::mutex jobsMutex;
     std::condition_variable jobsReady;
+    std::condition_variable idle;
+    std::size_t activeJobs = 0;
     bool stopping = false;
 };
 

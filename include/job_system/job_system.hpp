@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <cstddef>
 #include <functional>
@@ -23,6 +24,9 @@ public:
     // Block until all jobs submitted so far have completed.
     void waitIdle();
 
+    // Number of jobs that threw an exception during execution.
+    std::size_t getFailedJobCount() const noexcept;
+
 private:
     void workerLoop();
 
@@ -32,6 +36,7 @@ private:
     std::condition_variable jobsReady;
     std::condition_variable idle;
     std::size_t activeJobs = 0;
+    std::atomic<std::size_t> failedJobs{0};
     bool stopping = false;
 };
 

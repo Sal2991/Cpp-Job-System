@@ -17,6 +17,19 @@ int main() {
 
     jobs.waitIdle();
     assert(finishedCount.load() == 10);
+    assert(jobs.getFailedJobCount() == 0);
+
+    // A throwing task is counted, but must not kill the worker.
+    jobs.submit([] {
+        throw std::runtime_error("expected test failure");
+    });
+    jobs.submit([&finishedCount] {
+        finishedCount.fetch_add(1);
+    });
+    jobs.waitIdle();
+
+    assert(jobs.getFailedJobCount() == 1);
+    assert(finishedCount.load() == 11);
 
     bool rejectedEmptyJob = false;
     try {
@@ -32,7 +45,7 @@ int main() {
         finishedCount.fetch_add(1);
     });
     singleWorker.waitIdle();
-    assert(finishedCount.load() == 11);
+    assert(finishedCount.load() == 12);
 
     return 0;
 }

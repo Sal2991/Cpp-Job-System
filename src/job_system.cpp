@@ -55,6 +55,10 @@ void JobSystem::waitIdle() {
     });
 }
 
+std::size_t JobSystem::getFailedJobCount() const noexcept {
+    return failedJobs.load();
+}
+
 void JobSystem::workerLoop() {
     while (true) {
         std::function<void()> job;
@@ -74,8 +78,13 @@ void JobSystem::workerLoop() {
             ++activeJobs;
         }
 
-        // Run the job without holding the queue lock.
-        job();
+        // A failing job must not terminate its worker or prevent later jobs
+        // from running. The system records the failure and continues.
+        try {
+            job();
+        } catch (...) {
+            failedJobs.fetch_add(1);
+        }
 
         {
             std::lock_guard<std::mutex> lock(jobsMutex);

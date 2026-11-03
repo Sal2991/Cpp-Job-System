@@ -11,7 +11,9 @@ A small C++23 thread-pool/job-system project for learning concurrent task execut
 - Provides `waitIdle()` to block until the queue is empty and all active jobs finish
 - Drains queued work during shutdown and joins worker threads
 - Rejects empty job functions with `std::invalid_argument`
-- Includes an example and tests for completion tracking, empty submissions, and zero-worker normalization
+- Catches exceptions thrown by jobs so a single failed task does not terminate its worker
+- Exposes `getFailedJobCount()` to inspect how many jobs failed
+- Includes tests for completion tracking, invalid submissions, zero-worker normalization, and worker recovery after an exception
 
 ## Build and test
 
@@ -33,6 +35,6 @@ For multi-configuration generators such as Visual Studio, the executable is typi
 
 ## Limitations and next steps
 
-This is an early learning project, not a production-ready executor. Jobs have no return-value API or defined exception-handling policy; an exception escaping a job can terminate the process. `waitIdle()` is intended to wait for jobs to complete, not to prevent other threads from submitting more work concurrently. The tests are useful regression checks but are not exhaustive coverage of shutdown races.
+This is an early learning project, not a production-ready executor. Failed jobs are counted, but their exception details are not retained or rethrown to the submitting thread. `waitIdle()` is intended to wait for jobs to complete, not to prevent other threads from submitting more work concurrently. The tests are useful regression checks but are not exhaustive coverage of shutdown races.
 
-Next steps: define an exception policy, add stress tests for concurrent submission/shutdown, and benchmark worker counts.
+Next steps: add stress tests for concurrent submission/shutdown, consider a future-based result API, and benchmark worker counts.
